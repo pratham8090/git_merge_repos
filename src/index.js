@@ -3,12 +3,16 @@ const app = express();
 const cors = require("cors");
 const { exec } = require("child_process");
 var path = require("path");
+let randomString = require("randomstring");
 
 app.use(express.json());
 
-app.use(cors());
-
 app.post("/test", async function (req, res) {
+
+  let random = randomString.generate({
+    length: 12,
+    charset: 'alphabetic'
+  });
   let fileNameRepoAll = path.basename(req.body.repo_all);
   fileNameRepoAll = fileNameRepoAll.substring(0, fileNameRepoAll.indexOf("."));
 
@@ -19,7 +23,8 @@ app.post("/test", async function (req, res) {
   fileNameRepo2 = fileNameRepo2.substring(0, fileNameRepo2.indexOf("."));
 
   let commands = [];
-  commands.push("git clone " + req.body.repo_all);
+  commands.push("git clone " + req.body.repo_all +".");
+  commands.push("git checkout -b  " + random );
   
   commands.push(
     "git clone " + req.body.repo_1 + " " + fileNameRepoAll + "/repo1"
