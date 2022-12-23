@@ -9,7 +9,6 @@ app.use(express.json());
 app.use(cors());
 
 app.post("/test", async function (req, res) {
-  //   return res.send(req.body);
   let fileNameRepoAll = path.basename(req.body.repo_all);
   fileNameRepoAll = fileNameRepoAll.substring(0, fileNameRepoAll.indexOf("."));
 
@@ -21,7 +20,7 @@ app.post("/test", async function (req, res) {
 
   let commands = [];
   commands.push("git clone " + req.body.repo_all);
-  // commands.push("cd " + fileNameRepoAll);
+  
   commands.push(
     "git clone " + req.body.repo_1 + " " + fileNameRepoAll + "/repo1"
   );
@@ -29,36 +28,15 @@ app.post("/test", async function (req, res) {
     "git clone " + req.body.repo_2 + " " + fileNameRepoAll + "/repo2"
   );
 
-  // commands.push("cd " + fileNameRepo1);
   commands.push("rm -rf git_merge/repo1/.git");
-  // commands.push("cd ..");
-
-  // commands.push("cd " + fileNameRepo2);
   commands.push("rm -rf git_merge/repo2/.git");
-  // commands.push("cd ..");
-  commands.push('git add .');
+
+  commands.push("git add .");
   commands.push('git commit -m "merge rep-frontend"');
   commands.push("git push");
 
-  // console.log(commands);
-  // return;
-
-  // exec("git clone " + req.body.repo_all, (error, stdout, stderr) => {
-  //   if (error) {
-  //     console.log(`error: ${error.message}`);
-  //     return;
-  //   }
-  //   if (stderr) {
-  //     console.log(`stderr: ${stderr}`);
-  //     return;
-  //   }
-  //   console.log(`stdout: ${stdout}`);
-  // });
-
   for (let i = 0; i < commands.length; i++) {
-    console.log("inLoop");
     await new Promise((resolve, reject) => {
-      console.log("inFunction");
       console.log("Running [" + commands[i] + "]");
       exec(commands[i], (error, stdout, stderr) => {
         if (error) {
@@ -74,6 +52,7 @@ app.post("/test", async function (req, res) {
       });
     });
   }
+  
   return res.send({ success: true });
 });
 
