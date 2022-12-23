@@ -13,6 +13,7 @@ app.post("/test", async function (req, res) {
     length: 12,
     charset: 'alphabetic'
   });
+  
   let fileNameRepoAll = path.basename(req.body.repo_all);
   fileNameRepoAll = fileNameRepoAll.substring(0, fileNameRepoAll.indexOf("."));
 
@@ -23,8 +24,8 @@ app.post("/test", async function (req, res) {
   fileNameRepo2 = fileNameRepo2.substring(0, fileNameRepo2.indexOf("."));
 
   let commands = [];
-  commands.push("git clone " + req.body.repo_all +".");
-  commands.push("git checkout -b  " + random );
+  commands.push("git clone " + req.body.repo_all);
+  commands.push("cd "+ fileNameRepoAll +" && git checkout -b  " + random );
   
   commands.push(
     "git clone " + req.body.repo_1 + " " + fileNameRepoAll + "/repo1"
@@ -36,9 +37,9 @@ app.post("/test", async function (req, res) {
   commands.push("rm -rf git_merge/repo1/.git");
   commands.push("rm -rf git_merge/repo2/.git");
 
-  commands.push("git add .");
-  commands.push('git commit -m "merge rep-frontend"');
-  commands.push("git push");
+  commands.push("cd "+ fileNameRepoAll +" && git add .");
+  commands.push('cd '+ fileNameRepoAll +' && git commit -m "merge rep-frontend"');
+  commands.push("cd "+ fileNameRepoAll +" && git push --set-upstream origin " + random);
 
   for (let i = 0; i < commands.length; i++) {
     await new Promise((resolve, reject) => {
