@@ -1,65 +1,29 @@
 const express = require("express");
 const app = express();
-const cors = require("cors");
-const { exec } = require("child_process");
-var path = require("path");
-let randomString = require("randomstring");
-
 app.use(express.json());
+const Sequelize = require("sequelize");
 
-app.post("/test", async function (req, res) {
+const sequelize = new Sequelize("pj", "root", "admin@123", {
+  host: "localhost",
+  dialect: "mysql",
+});
 
-  let random = randomString.generate({
-    length: 12,
-    charset: 'alphabetic'
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log("Connection has been established successfully.");
+  })
+  .catch((error) => {
+    console.error("Unable to connect to the database: ", error);
   });
-  
-  let fileNameRepoAll = path.basename(req.body.repo_all);
-  fileNameRepoAll = fileNameRepoAll.substring(0, fileNameRepoAll.indexOf("."));
 
-  let fileNameRepo1 = path.basename(req.body.repo_1);
-  fileNameRepo1 = fileNameRepo1.substring(0, fileNameRepo1.indexOf("."));
-
-  let fileNameRepo2 = path.basename(req.body.repo_2);
-  fileNameRepo2 = fileNameRepo2.substring(0, fileNameRepo2.indexOf("."));
-
-  let commands = [];
-  commands.push("git clone " + req.body.repo_all);
-  commands.push("cd "+ fileNameRepoAll +" && git checkout -b  " + random );
-  
-  commands.push(
-    "git clone " + req.body.repo_1 + " " + fileNameRepoAll + "/repo1"
+app.get("/", async function (req, res) {
+  const results = await sequelize.query(
+    "SELECT jsonField FROM table2 LIMIT 1;"
   );
-  commands.push(
-    "git clone " + req.body.repo_2 + " " + fileNameRepoAll + "/repo2"
-  );
+  jsonField = results[0][0].jsonField.replace(/\n/g, '');
 
-  commands.push("rm -rf git_merge/repo1/.git");
-  commands.push("rm -rf git_merge/repo2/.git");
-
-  commands.push("cd "+ fileNameRepoAll +" && git add .");
-  commands.push('cd '+ fileNameRepoAll +' && git commit -m "merge rep-frontend"');
-  commands.push("cd "+ fileNameRepoAll +" && git push --set-upstream origin " + random);
-
-  for (let i = 0; i < commands.length; i++) {
-    await new Promise((resolve, reject) => {
-      console.log("Running [" + commands[i] + "]");
-      exec(commands[i], (error, stdout, stderr) => {
-        if (error) {
-          console.log(`Error while running ${commands[i]}: ${error.message}`);
-          reject(error);
-        }
-        if (stderr) {
-          console.log(`Stderr while running ${commands[i]}: ${stderr}`);
-          resolve(stderr);
-        }
-        console.log(`Stdout while running ${commands[i]}: ${stdout}`);
-        resolve(stdout);
-      });
-    });
-  }
-  
-  return res.send({ success: true });
+  res.send(JSON.parse(jsonField));
 });
 
 app.listen(process.env.PORT || 5000, function () {
